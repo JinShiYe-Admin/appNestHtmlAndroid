@@ -1,15 +1,12 @@
 package net.jiaobaowang.wisdomschool.Activity;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -21,16 +18,18 @@ import android.widget.Toast;
 import net.jiaobaowang.wisdomschool.R;
 import net.jiaobaowang.wisdomschool.common.JsToJava;
 import net.jiaobaowang.wisdomschool.common.ShellConfig;
+import net.jiaobaowang.wisdomschool.common.ShellWebChromeClient;
+import net.jiaobaowang.wisdomschool.shell_interface.FileChooser;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    private static final int REQUEST_SELECT_FILE = 1;
-    private final static int REQUEST_SELECT_FILE_OTHER = 2;
+
+
     private long mExitTime;//声明一个long类型变量：用于存放上一点击“返回键”的时刻
     private Context mContext;
     private WebView mWebView;
-    private ValueCallback<Uri> mUploadMessage;
-    private ValueCallback<Uri[]> uploadMessage;
+    private ValueCallback<Uri> lowValueCallback;
+    private ValueCallback<Uri[]> heightValueCallback;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -55,87 +54,35 @@ public class MainActivity extends AppCompatActivity {
                 return false; // 拦截了，如果不拦截就是 view.loadUrl(url)
             }
         });
-        mWebView.setWebChromeClient(new WebChromeClient() {
-            // android < 3.0
-            protected void openFileChooser(ValueCallback<Uri> uploadMsg) {
-                Log.i(TAG, "openFileChooser:0");
-                mUploadMessage = uploadMsg;
-                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-                i.addCategory(Intent.CATEGORY_OPENABLE);
-                i.setType("*/*");
-                startActivityForResult(Intent.createChooser(i, "选择操作"), REQUEST_SELECT_FILE_OTHER);
+        mWebView.setWebChromeClient(new ShellWebChromeClient(mContext, new FileChooser() {
+            @Override
+            public void lowVersion(ValueCallback<Uri> valueCallback) {
+                lowValueCallback = valueCallback;
             }
 
-            // android >= 3.0
-            protected void openFileChooser(ValueCallback uploadMsg, String acceptType) {
-                Log.i(TAG, "openFileChooser:1 acceptType:" + acceptType);
-                mUploadMessage = uploadMsg;
-                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-                i.addCategory(Intent.CATEGORY_OPENABLE);
-                if ("".equals(acceptType)) {
-                    i.setType("*/*");
-                } else {
-                    i.setType(acceptType);
-                }
-                startActivityForResult(Intent.createChooser(i, "选择操作"), REQUEST_SELECT_FILE_OTHER);
+            @Override
+            public void heightVersion(ValueCallback<Uri[]> valueCallback) {
+                heightValueCallback = valueCallback;
             }
-
-            //android >= 4.1
-            protected void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture) {
-                Log.i(TAG, "openFileChooser:2 acceptType:" + acceptType + " capture:" + capture);
-                mUploadMessage = uploadMsg;
-                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-                i.addCategory(Intent.CATEGORY_OPENABLE);
-                if ("".equals(acceptType)) {
-                    i.setType("*/*");
-                } else {
-                    i.setType(acceptType);
-                }
-                startActivityForResult(Intent.createChooser(i, "选择操作"), REQUEST_SELECT_FILE_OTHER);
-            }
-
-            // android >= 5.0
-            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-            public boolean onShowFileChooser(WebView mWebView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
-                Log.i(TAG, "onShowFileChooser:0");
-                if (uploadMessage != null) {
-                    uploadMessage.onReceiveValue(null);
-                    uploadMessage = null;
-                }
-                uploadMessage = filePathCallback;
-                Intent i = fileChooserParams.createIntent();
-                try {
-                    startActivityForResult(i, REQUEST_SELECT_FILE);
-                } catch (ActivityNotFoundException e) {
-                    e.printStackTrace();
-                    Log.e(TAG, e.toString());
-                    uploadMessage = null;
-                    Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_LONG).show();
-                    return false;
-                }
-                return true;
-            }
-        });
+        }));
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case REQUEST_SELECT_FILE:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    if (null == uploadMessage)
-                        return;
-                    uploadMessage.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
-                    uploadMessage = null;
+            case ShellConfig.REQUEST_SELECT_FILE_LOW:
+                if (null != lowValueCallback) {
+                    Uri result = data == null || resultCode != MainActivity.RESULT_OK ? null : data.getData();
+                    lowValueCallback.onReceiveValue(result);
+                    lowValueCallback = null;
                 }
                 break;
-            case REQUEST_SELECT_FILE_OTHER:
-                if (null == mUploadMessage)
-                    return;
-                Uri result = data == null || resultCode != MainActivity.RESULT_OK ? null : data.getData();
-                mUploadMessage.onReceiveValue(result);
-                mUploadMessage = null;
+            case ShellConfig.REQUEST_SELECT_FILE_HEIGHT:
+                if (null != heightValueCallback && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    heightValueCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
+                    heightValueCallback = null;
+                }
                 break;
         }
     }
