@@ -1,4 +1,4 @@
-package net.jiaobaowang.androidshell;
+package net.jiaobaowang.wisdomschool;
 
 import org.junit.Test;
 

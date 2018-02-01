@@ -1,4 +1,4 @@
-package net.jiaobaowang.androidshell;
+package net.jiaobaowang.wisdomschool;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

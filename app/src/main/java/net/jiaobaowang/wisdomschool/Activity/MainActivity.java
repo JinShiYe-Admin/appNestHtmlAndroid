@@ -1,8 +1,9 @@
-package net.jiaobaowang.androidshell;
+package net.jiaobaowang.wisdomschool.Activity;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -17,12 +18,16 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import net.jiaobaowang.wisdomschool.R;
+import net.jiaobaowang.wisdomschool.common.JsToJava;
+import net.jiaobaowang.wisdomschool.common.ShellConfig;
 
+public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private static final int REQUEST_SELECT_FILE = 1;
     private final static int REQUEST_SELECT_FILE_OTHER = 2;
     private long mExitTime;//声明一个long类型变量：用于存放上一点击“返回键”的时刻
+    private Context mContext;
     private WebView mWebView;
     private ValueCallback<Uri> mUploadMessage;
     private ValueCallback<Uri[]> uploadMessage;
@@ -32,15 +37,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mContext = this;
         mWebView = findViewById(R.id.web_view);
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true); // 启用JavaScript
+        mWebView.addJavascriptInterface(new JsToJava(mContext), "native");
         //允许弹出框
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
-        mWebView.loadUrl("http://192.168.1.121:8020/JavaAndJS/index.html");
+        mWebView.loadUrl(ShellConfig.MAIN_URL);
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {

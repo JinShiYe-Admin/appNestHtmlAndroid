@@ -3,11 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="net.jiaobaowang.wisdomschool.Activity.MainActivity">
+    tools:context="net.jiaobaowang.wisdomschool.Activity.SplashActivity">
 
-    <WebView
-        android:id="@+id/web_view"
+    <ImageView
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
+        android:layout_height="match_parent"
+        android:contentDescription="@string/app_name"
+        android:scaleType="fitXY"
+        android:src="@mipmap/app_image" />
 </LinearLayout>
