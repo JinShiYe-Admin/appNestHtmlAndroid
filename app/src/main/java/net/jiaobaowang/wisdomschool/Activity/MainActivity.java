@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
-import android.webkit.DownloadListener;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -20,13 +19,12 @@ import android.widget.Toast;
 import net.jiaobaowang.wisdomschool.R;
 import net.jiaobaowang.wisdomschool.common.JsToJava;
 import net.jiaobaowang.wisdomschool.common.ShellConfig;
+import net.jiaobaowang.wisdomschool.common.ShellDownloadListener;
 import net.jiaobaowang.wisdomschool.common.ShellWebChromeClient;
 import net.jiaobaowang.wisdomschool.common.ShellWebViewClient;
 import net.jiaobaowang.wisdomschool.shell_interface.FileChooser;
 
-import java.io.File;
-
-public class MainActivity extends AppCompatActivity implements DownloadListener {
+public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private long mExitTime;//声明一个long类型变量：用于存放上一点击“返回键”的时刻
     private WebView mWebView;
@@ -65,21 +63,22 @@ public class MainActivity extends AppCompatActivity implements DownloadListener 
                 heightValueCallback = valueCallback;
             }
         }));
+        mWebView.setDownloadListener(new ShellDownloadListener(this));
         mWebView.loadUrl(ShellConfig.MAIN_URL);
-        File file = this.getApplicationContext().getCacheDir().getAbsoluteFile();
-        Log.e(TAG, "缓存文件：" + file.getAbsolutePath());
-        if (file.exists()) {
-            Log.e(TAG, "有需要清除的文件");
-            if (file.isFile()) {
-                Log.e(TAG, "isFile:" + file.getName());
-            } else if (file.isDirectory()) {
-                Log.e(TAG, "isDirectory:" + file.getName());
-                File files[] = file.listFiles();
-                Log.e(TAG, "files:" + files.length);
-            }
-        } else {
-            Log.e(TAG, "没有需要清除的文件");
-        }
+//        File file = this.getApplicationContext().getCacheDir().getAbsoluteFile();
+//        Log.e(TAG, "缓存文件：" + file.getAbsolutePath());
+//        if (file.exists()) {
+//            Log.e(TAG, "有需要清除的文件");
+//            if (file.isFile()) {
+//                Log.e(TAG, "isFile:" + file.getName());
+//            } else if (file.isDirectory()) {
+//                Log.e(TAG, "isDirectory:" + file.getName());
+//                File files[] = file.listFiles();
+//                Log.e(TAG, "files:" + files.length);
+//            }
+//        } else {
+//            Log.e(TAG, "没有需要清除的文件");
+//        }
     }
 
     @Override
@@ -150,8 +149,4 @@ public class MainActivity extends AppCompatActivity implements DownloadListener 
         return super.onKeyDown(keyCode, event);
     }
 
-    @Override
-    public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimeType, long contentLength) {
-        Log.i(TAG, "onDownloadStart:");
-    }
 }

@@ -13,6 +13,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import net.jiaobaowang.wisdomschool.R;
 import net.jiaobaowang.wisdomschool.shell_interface.FileChooser;
 
 /**
@@ -96,6 +97,6 @@ public class ShellWebChromeClient extends WebChromeClient {
         } else {
             i.setType(accept);
         }
-        ((Activity) context).startActivityForResult(Intent.createChooser(i, "选择操作"), ShellConfig.REQUEST_SELECT_FILE_LOW);
+        ((Activity) context).startActivityForResult(Intent.createChooser(i, context.getResources().getString(R.string.selection_operation)), ShellConfig.REQUEST_SELECT_FILE_LOW);
     }
 }
