@@ -30,14 +30,18 @@ public class ShellWebChromeClient extends WebChromeClient {
         this.fileChooser = fileChooser;
     }
 
-    // android < 3.0
+    /**
+     * 文件选取(android < 3.0)
+     */
     protected void openFileChooser(ValueCallback<Uri> valueCallback) {
         Log.i(TAG, "openFileChooser:android < 3.0");
         fileChooser.lowVersion(valueCallback);
         lowFileChooser("", "");
     }
 
-    // android >= 3.0
+    /**
+     * 文件选取(android >= 3.0)
+     */
     protected void openFileChooser(ValueCallback valueCallback, String acceptType) {
         Log.i(TAG, "openFileChooser:android >= 3.0" + "\n"
                 + "acceptType:" + acceptType);
@@ -45,7 +49,9 @@ public class ShellWebChromeClient extends WebChromeClient {
         lowFileChooser(acceptType, "");
     }
 
-    //android >= 4.1
+    /**
+     * 文件选取(android >= 4.1)
+     */
     protected void openFileChooser(ValueCallback<Uri> valueCallback, String accept, String capture) {
         Log.i(TAG, "openFileChooser:android >= 4.1" + "\n"
                 + "acceptType:" + accept + "\n"
@@ -54,7 +60,9 @@ public class ShellWebChromeClient extends WebChromeClient {
         lowFileChooser(accept, capture);
     }
 
-    // android >= 5.0
+    /**
+     * 文件选取(android >= 5.0)
+     */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public boolean onShowFileChooser(WebView mWebView, ValueCallback<Uri[]> valueCallback, FileChooserParams fileChooserParams) {
         Log.i(TAG, "onShowFileChooser:android >= 5.0");
@@ -72,7 +80,7 @@ public class ShellWebChromeClient extends WebChromeClient {
     }
 
     /**
-     * 系统版本低于5.0的文件选择
+     * 文件选取(android < 5.0)最终调用方法
      *
      * @param accept  选取文件类型
      * @param capture 选取文件方法

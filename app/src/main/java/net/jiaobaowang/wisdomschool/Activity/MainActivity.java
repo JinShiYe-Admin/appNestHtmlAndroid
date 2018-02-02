@@ -1,7 +1,6 @@
 package net.jiaobaowang.wisdomschool.Activity;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -9,6 +8,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
+import android.webkit.DownloadListener;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -22,12 +24,11 @@ import net.jiaobaowang.wisdomschool.common.ShellWebChromeClient;
 import net.jiaobaowang.wisdomschool.common.ShellWebViewClient;
 import net.jiaobaowang.wisdomschool.shell_interface.FileChooser;
 
-public class MainActivity extends AppCompatActivity {
+import java.io.File;
+
+public class MainActivity extends AppCompatActivity implements DownloadListener {
     private static final String TAG = "MainActivity";
-
-
     private long mExitTime;//声明一个long类型变量：用于存放上一点击“返回键”的时刻
-    private Context mContext;
     private WebView mWebView;
     private ValueCallback<Uri> lowValueCallback;
     private ValueCallback<Uri[]> heightValueCallback;
@@ -38,11 +39,14 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "------onCreate------");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mContext = this;
         mWebView = findViewById(R.id.web_view);
         WebSettings webSettings = mWebView.getSettings();
-        webSettings.setJavaScriptEnabled(true); // 启用JavaScript
-        mWebView.addJavascriptInterface(new JsToJava(mContext), "native");
+        //启用JavaScript
+        webSettings.setJavaScriptEnabled(true);
+        //启用Web Storage
+        webSettings.setDomStorageEnabled(true);
+
+        mWebView.addJavascriptInterface(new JsToJava(this), "native");
         //允许弹出框
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -50,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mWebView.setWebViewClient(new ShellWebViewClient());
-        mWebView.setWebChromeClient(new ShellWebChromeClient(mContext, new FileChooser() {
+        mWebView.setWebChromeClient(new ShellWebChromeClient(this, new FileChooser() {
             @Override
             public void lowVersion(ValueCallback<Uri> valueCallback) {
                 lowValueCallback = valueCallback;
@@ -62,20 +66,20 @@ public class MainActivity extends AppCompatActivity {
             }
         }));
         mWebView.loadUrl(ShellConfig.MAIN_URL);
-//        File file = this.getApplicationContext().getCacheDir().getAbsoluteFile();
-//        Log.e(TAG, "缓存文件：" + file.getAbsolutePath());
-//        if (file.exists()) {
-//            Log.e(TAG, "有需要清除的文件");
-//            if (file.isFile()) {
-//                Log.e(TAG, "isFile:" + file.getName());
-//            } else if (file.isDirectory()) {
-//                Log.e(TAG, "isDirectory:" + file.getName());
-//                File files[] = file.listFiles();
-//                Log.e(TAG, "files:" + files.length);
-//            }
-//        } else {
-//            Log.e(TAG, "没有需要清除的文件");
-//        }
+        File file = this.getApplicationContext().getCacheDir().getAbsoluteFile();
+        Log.e(TAG, "缓存文件：" + file.getAbsolutePath());
+        if (file.exists()) {
+            Log.e(TAG, "有需要清除的文件");
+            if (file.isFile()) {
+                Log.e(TAG, "isFile:" + file.getName());
+            } else if (file.isDirectory()) {
+                Log.e(TAG, "isDirectory:" + file.getName());
+                File files[] = file.listFiles();
+                Log.e(TAG, "files:" + files.length);
+            }
+        } else {
+            Log.e(TAG, "没有需要清除的文件");
+        }
     }
 
     @Override
@@ -101,26 +105,31 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onResume() {
+        Log.i(TAG, "------onResume------");
         super.onResume();
-        if (mWebView != null) {
-            mWebView.getSettings().setJavaScriptEnabled(true);
-        }
+        mWebView.getSettings().setJavaScriptEnabled(true);
     }
 
     @Override
     protected void onStop() {
+        Log.i(TAG, "------onStop------");
         super.onStop();
-        if (mWebView != null) {
-            mWebView.getSettings().setJavaScriptEnabled(false);
-        }
+        mWebView.getSettings().setJavaScriptEnabled(false);
     }
 
     @Override
     protected void onDestroy() {
+        Log.i(TAG, "------onDestroy------");
         super.onDestroy();
-        if (mWebView != null) {
-            mWebView.destroy();
-        }
+        CookieSyncManager.createInstance(MainActivity.this);  //Create a singleton CookieSyncManager within a context
+        CookieManager cookieManager = CookieManager.getInstance(); // the singleton CookieManager instance
+        cookieManager.removeAllCookie();// Removes all cookies.
+
+        mWebView.setWebChromeClient(null);
+        mWebView.setWebViewClient(null);
+        mWebView.getSettings().setJavaScriptEnabled(false);
+        mWebView.clearCache(true);
+        mWebView.destroy();
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -139,5 +148,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimeType, long contentLength) {
+        Log.i(TAG, "onDownloadStart:");
     }
 }

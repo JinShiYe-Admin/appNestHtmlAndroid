@@ -15,12 +15,18 @@ import android.webkit.WebViewClient;
 public class ShellWebViewClient extends WebViewClient {
     private static final String TAG = "ShellWebViewClient";
 
+    /**
+     * WebView中任何跳转都会走这个方法，我们在这里进行判断，如果是我们约定好的连接，就进行自己的操作，否则就放行
+     */
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        // WebView中任何跳转都会走这个方法，我们在这里进行判断，如果是我们约定好的连接，就进行自己的操作，否则就放行
-        return false; // 拦截了，如果不拦截就是 view.loadUrl(url)
+        Log.i(TAG, "shouldOverrideUrlLoading:" + url);
+        return false;
     }
 
+    /**
+     * 页面加载失败(android < 6.0)
+     */
     @Override
     public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
         super.onReceivedError(view, errorCode, description, failingUrl);
@@ -30,6 +36,9 @@ public class ShellWebViewClient extends WebViewClient {
         showError(errorCode, description, failingUrl);
     }
 
+    /**
+     * 页面加载失败(android >= 6.0)
+     */
     @TargetApi(Build.VERSION_CODES.M)
     @Override
     public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
