@@ -32,21 +32,24 @@ public class ShellWebChromeClient extends WebChromeClient {
 
     // android < 3.0
     protected void openFileChooser(ValueCallback<Uri> valueCallback) {
-        Log.i(TAG, "openFileChooser:0");
+        Log.i(TAG, "openFileChooser:android < 3.0");
         fileChooser.lowVersion(valueCallback);
         lowFileChooser("", "");
     }
 
     // android >= 3.0
     protected void openFileChooser(ValueCallback valueCallback, String acceptType) {
-        Log.i(TAG, "openFileChooser:1 acceptType:" + acceptType);
+        Log.i(TAG, "openFileChooser:android >= 3.0" + "\n"
+                + "acceptType:" + acceptType);
         fileChooser.lowVersion(valueCallback);
         lowFileChooser(acceptType, "");
     }
 
     //android >= 4.1
     protected void openFileChooser(ValueCallback<Uri> valueCallback, String accept, String capture) {
-        Log.i(TAG, "openFileChooser:2 acceptType:" + accept + " capture:" + capture);
+        Log.i(TAG, "openFileChooser:android >= 4.1" + "\n"
+                + "acceptType:" + accept + "\n"
+                + "capture:" + capture);
         fileChooser.lowVersion(valueCallback);
         lowFileChooser(accept, capture);
     }
@@ -54,7 +57,7 @@ public class ShellWebChromeClient extends WebChromeClient {
     // android >= 5.0
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public boolean onShowFileChooser(WebView mWebView, ValueCallback<Uri[]> valueCallback, FileChooserParams fileChooserParams) {
-        Log.i(TAG, "onShowFileChooser:0");
+        Log.i(TAG, "onShowFileChooser:android >= 5.0");
         Intent i = fileChooserParams.createIntent();
         try {
             fileChooser.heightVersion(valueCallback);
@@ -68,7 +71,16 @@ public class ShellWebChromeClient extends WebChromeClient {
         return true;
     }
 
+    /**
+     * 系统版本低于5.0的文件选择
+     *
+     * @param accept  选取文件类型
+     * @param capture 选取文件方法
+     */
     private void lowFileChooser(String accept, String capture) {
+        Log.i(TAG, "------lowFileChooser------" + "\n"
+                + "accept:" + accept + "\n"
+                + "capture:" + capture);
         Intent i = new Intent(Intent.ACTION_GET_CONTENT);
         i.addCategory(Intent.CATEGORY_OPENABLE);
         if ("".equals(accept)) {

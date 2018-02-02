@@ -7,18 +7,19 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import net.jiaobaowang.wisdomschool.R;
 import net.jiaobaowang.wisdomschool.common.JsToJava;
 import net.jiaobaowang.wisdomschool.common.ShellConfig;
 import net.jiaobaowang.wisdomschool.common.ShellWebChromeClient;
+import net.jiaobaowang.wisdomschool.common.ShellWebViewClient;
 import net.jiaobaowang.wisdomschool.shell_interface.FileChooser;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.i(TAG, "------onCreate------");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mContext = this;
@@ -46,14 +48,8 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
-        mWebView.loadUrl(ShellConfig.MAIN_URL);
-        mWebView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                // WebView中任何跳转都会走这个方法，我们在这里进行判断，如果是我们约定好的连接，就进行自己的操作，否则就放行
-                return false; // 拦截了，如果不拦截就是 view.loadUrl(url)
-            }
-        });
+
+        mWebView.setWebViewClient(new ShellWebViewClient());
         mWebView.setWebChromeClient(new ShellWebChromeClient(mContext, new FileChooser() {
             @Override
             public void lowVersion(ValueCallback<Uri> valueCallback) {
@@ -65,6 +61,21 @@ public class MainActivity extends AppCompatActivity {
                 heightValueCallback = valueCallback;
             }
         }));
+        mWebView.loadUrl(ShellConfig.MAIN_URL);
+//        File file = this.getApplicationContext().getCacheDir().getAbsoluteFile();
+//        Log.e(TAG, "缓存文件：" + file.getAbsolutePath());
+//        if (file.exists()) {
+//            Log.e(TAG, "有需要清除的文件");
+//            if (file.isFile()) {
+//                Log.e(TAG, "isFile:" + file.getName());
+//            } else if (file.isDirectory()) {
+//                Log.e(TAG, "isDirectory:" + file.getName());
+//                File files[] = file.listFiles();
+//                Log.e(TAG, "files:" + files.length);
+//            }
+//        } else {
+//            Log.e(TAG, "没有需要清除的文件");
+//        }
     }
 
     @Override
