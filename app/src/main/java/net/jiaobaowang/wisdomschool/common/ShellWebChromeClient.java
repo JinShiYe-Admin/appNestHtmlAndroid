@@ -16,6 +16,8 @@ import android.widget.Toast;
 import net.jiaobaowang.wisdomschool.R;
 import net.jiaobaowang.wisdomschool.shell_interface.FileChooser;
 
+import java.util.Arrays;
+
 /**
  * 网页中选取文件
  * Created by ShangLinMo on 2018/2/1.
@@ -37,7 +39,7 @@ public class ShellWebChromeClient extends WebChromeClient {
     protected void openFileChooser(ValueCallback<Uri> valueCallback) {
         Log.i(TAG, "openFileChooser:android < 3.0");
         fileChooser.lowVersion(valueCallback);
-        lowFileChooser("", "");
+        shellFileChooser("", "");
     }
 
     /**
@@ -47,7 +49,7 @@ public class ShellWebChromeClient extends WebChromeClient {
         Log.i(TAG, "openFileChooser:android >= 3.0" + "\n"
                 + "acceptType:" + acceptType);
         fileChooser.lowVersion(valueCallback);
-        lowFileChooser(acceptType, "");
+        shellFileChooser(acceptType, "");
     }
 
     /**
@@ -58,7 +60,7 @@ public class ShellWebChromeClient extends WebChromeClient {
                 + "acceptType:" + accept + "\n"
                 + "capture:" + capture);
         fileChooser.lowVersion(valueCallback);
-        lowFileChooser(accept, capture);
+        shellFileChooser(accept, capture);
     }
 
     /**
@@ -67,9 +69,17 @@ public class ShellWebChromeClient extends WebChromeClient {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public boolean onShowFileChooser(WebView mWebView, ValueCallback<Uri[]> valueCallback, FileChooserParams fileChooserParams) {
         Log.i(TAG, "onShowFileChooser:android >= 5.0");
+        Log.i(TAG, "FileChooserParams:" + "\n"
+                + "getAcceptTypes:" + Arrays.toString(fileChooserParams.getAcceptTypes()) + "\n"
+                + "getFilenameHint:" + fileChooserParams.getFilenameHint() + "\n"
+                + "getMode:" + fileChooserParams.getMode() + "\n"
+                + "getTitle:" + fileChooserParams.getTitle() + "\n"
+                + "isCaptureEnabled:" + fileChooserParams.isCaptureEnabled());
+
         Intent i = fileChooserParams.createIntent();
         try {
             fileChooser.heightVersion(valueCallback);
+
             ((Activity) context).startActivityForResult(i, ShellConfig.REQUEST_SELECT_FILE_HEIGHT);
         } catch (ActivityNotFoundException e) {
             e.printStackTrace();
@@ -86,17 +96,25 @@ public class ShellWebChromeClient extends WebChromeClient {
      * @param accept  选取文件类型
      * @param capture 选取文件方法
      */
-    private void lowFileChooser(String accept, String capture) {
-        Log.i(TAG, "------lowFileChooser------" + "\n"
+    private void shellFileChooser(String accept, String capture) {
+        Log.i(TAG, "------shellFileChooser------" + "\n"
                 + "accept:" + accept + "\n"
                 + "capture:" + capture);
         Intent i = new Intent(Intent.ACTION_GET_CONTENT);
         i.addCategory(Intent.CATEGORY_OPENABLE);
-        if ("".equals(accept)) {
+        if (null == accept || "".equals(accept)) {
             i.setType("*/*");
         } else {
             i.setType(accept);
         }
         ((Activity) context).startActivityForResult(Intent.createChooser(i, context.getResources().getString(R.string.selection_operation)), ShellConfig.REQUEST_SELECT_FILE_LOW);
+    }
+
+    private void userCameraTakePicture() {
+        Log.i(TAG, "用摄像头拍照");
+    }
+
+    private void userCameraRecordVideo() {
+        Log.i(TAG, "用摄像头录像");
     }
 }
