@@ -43,7 +43,8 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setJavaScriptEnabled(true);
         //启用Web Storage
         webSettings.setDomStorageEnabled(true);
-
+        //没有缓存
+        //webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         mWebView.addJavascriptInterface(new JsToJava(this), "native");
         //允许弹出框
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
@@ -51,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
             webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
 
-        mWebView.setWebViewClient(new ShellWebViewClient());
+        mWebView.setWebViewClient(new ShellWebViewClient(this, mWebView));
         mWebView.setWebChromeClient(new ShellWebChromeClient(this, new FileChooser() {
             @Override
             public void lowVersion(ValueCallback<Uri> valueCallback) {
