@@ -47,4 +47,25 @@ public class JsToJava {
         return ShellConfig.SCHOOL_ID;
     }
 
+    /**
+     * 保存个人信息
+     *
+     * @param value 要保存的信息
+     */
+    @JavascriptInterface
+    public void setStoragePersonInfo(String value) {
+        SharePreferencesUtil util = new SharePreferencesUtil(context, ShellConfig.LOCAL_STORAGE);
+        util.putString(ShellConfig.PERSON_INFO, value);
+    }
+
+    /**
+     * 获取个人信息
+     *
+     * @return String 个人信息
+     */
+    @JavascriptInterface
+    public String getStoragePersonInfo() {
+        SharePreferencesUtil util = new SharePreferencesUtil(context, ShellConfig.LOCAL_STORAGE);
+        return util.getString(ShellConfig.PERSON_INFO);
+    }
 }

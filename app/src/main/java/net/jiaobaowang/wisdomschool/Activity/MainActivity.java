@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         //启用Web Storage
         webSettings.setDomStorageEnabled(true);
         //没有缓存
-        //webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         mWebView.addJavascriptInterface(new JsToJava(this), "native");
         //允许弹出框
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
