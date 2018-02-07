@@ -65,7 +65,7 @@ public class JsToJava {
      */
     @JavascriptInterface
     public String getStoragePersonInfo() {
-        SharePreferencesUtil util = new SharePreferencesUtil(context, ShellConfig.LOCAL_STORAGE);
+        SharePreferencesUtil util = new SharePreferencesUtil(context, ShellConfig.LOCAL_STORAGE,false);
         return util.getString(ShellConfig.PERSON_INFO);
     }
 }
